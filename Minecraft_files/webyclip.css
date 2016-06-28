@@ -1,0 +1,204 @@
+@font-face {
+  font-family: NerisThin;
+  src: url(../../fonts/neris-thin.otf);
+}
+@font-face {
+  font-family: NerisSemiBold;
+  src: url(../../fonts/neris-semibold.otf);
+}
+@font-face {
+  font-family: NerisLight;
+  src: url(../../fonts/neris-light.otf);
+}
+@font-face {
+  font-family: OpenSans;
+  src: url(../../fonts/openSans-hebrew-light.ttf);
+}
+@font-face {
+  font-family: HelveticaNeue;
+  src: url(../../fonts/helveticaNeue.ttf);
+}
+@font-face {
+  font-family: HelveticaNeueMedium;
+  src: url(../../fonts/helveticaNeue-medium.ttf);
+}
+@font-face {
+  font-family: HelveticaNeueThin;
+  src: url(../../fonts/helveticaNeue-thin.otf);
+}
+.link-button {
+  display: block;
+  width: 20px;
+  height: 100%;
+}
+.report-container {
+  display: none;
+  z-index: 2;
+  background-color: #FFFFFF;
+  -moz-box-shadow: 0 0 90px 5px #000000;
+  -webkit-box-shadow: 0 0 90px #000000;
+  box-shadow: 0 0 90px #000000;
+  width: 95%;
+  height: 95%;
+  padding: 10px;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+@media (min-width: 768px) {
+  .report-container {
+    width: 75%;
+  }
+}
+@media (min-width: 992px) {
+  .report-container {
+    width: 75%;
+    height: 80%;
+  }
+}
+.report-close {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px;
+}
+.report-close a.link-button {
+  height: 20px;
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuNWWFMmUAAAG8SURBVGhDzc5LbsMwEARRHywHyc18XCdcFEC1iuLHsmQDb+FWz3AeP7/PV+3/9/g2eeMuKHLoTnafhkUO38HuKpofilxyJbsH3UK96Cp2B8r34eJV7H3QmR74JHsXdW8zVNgAsnsmew/Z3fyBDSK7Z7B3kN1iF8AWILvvsP3ILjSELUJ2V9heZLemYc0WIrszbB+ymzRMthjZHWF7kF2jobEHkN0jNo/stmjYYg8hu8bmkN0jGh6xB5HdmvWR3R4Ne+xhZLewHrI7QsMRdgBWejM0HGWHYOT7Kg1n2EE9uWOWhrPssJacXaHhCjsw5cwqDVfZocjuOzRcYYemnFml4Sw7sCVnV2g4ww7ryR2zNBxlB2Hk+yoNR9ghWOnN0LDHDkB2C+shuyM0PGIPI7s16yO7PRq22IPIrrE5ZPeIhsYeQnaP2Dyy26JhsgeQ3RG2B9k1GtZsMbI7w/Yhu0lD2EJkd4XtRXZrGha2CNl9h+1HdqGhLUB2z2DvILvFLrBBZPdM9h6yu/ljA6h7n2Lvou5ND3yavQ86w8Ur2R0o37/uYNg9aH7MJXewuwr9kMN3svt2YQ59g+2Nz9cf0krFouXMSj0AAAAASUVORK5CYII=) no-repeat top center;
+  background-size: contain;
+}
+.report-close a.link-button:focus {
+  outline: 0;
+}
+.free-text {
+  width: 100%;
+}
+#tell_us_more {
+  margin-top: 5px;
+  color: #000000;
+  font-family: NerisSemiBold, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+}
+.embedded #tell_us_more {
+  font-size: 13px;
+}
+@media (min-width: 768px) {
+  .embedded #tell_us_more {
+    font-size: 16px;
+  }
+}
+.opt-label {
+  margin-left: 5px;
+  width: 90%;
+  color: #000000;
+  font-family: NerisLight, sans-serif;
+  font-size: 14px;
+  line-height: 1;
+}
+@media (min-width: 768px) {
+  .opt-label {
+    font-size: 16px;
+  }
+}
+#options {
+  overflow: auto;
+  width: 100%;
+  padding-left: 1px;
+}
+.embedded #options {
+  height: 30%;
+}
+@media (min-width: 640px) {
+  .embedded #options {
+    height: auto;
+  }
+}
+.subOptions {
+  margin-left: 10px;
+}
+.report-actions {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+.report-actions .btn {
+  text-decoration: none;
+  display: inline-block;
+  text-transform: uppercase;
+  width: 90px;
+  height: 35px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  padding: 10px 0;
+  color: #ffffff;
+  font-family: NerisSemiBold, sans-serif;
+  font-size: 12px;
+  line-height: 1;
+}
+.report-actions .btn-ok {
+  background-color: #0654ba;
+}
+.report-actions .btn-ok:hover {
+  background-color: #0079bc;
+}
+.report-actions .btn-cancel {
+  background-color: #0079bc;
+}
+.report-actions .btn-cancel:hover {
+  background-color: #45aad6;
+}
+.login-to-remove {
+  font-weight: bold;
+  color: #000000;
+  font-family: NerisSemiBold, sans-serif;
+  font-size: 14px;
+  line-height: 1;
+}
+@media (min-width: 768px) {
+  .login-to-remove {
+    color: #000000;
+    font-family: NerisSemiBold, sans-serif;
+    font-size: 16px;
+    line-height: 1;
+  }
+}
+#extraTextInput {
+  width: 50%;
+  margin-top: 5px;
+  color: #000000;
+  font-family: NerisSemiBold, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+}
+#comment {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  color: #000000;
+  font-family: NerisSemiBold, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+}
+.embedded #comment {
+  font-size: 13px;
+  margin-top: 10px;
+}
+#comment textarea {
+  height: 65px;
+}
+.embedded #comment textarea {
+  height: 50px;
+}
+@media (min-width: 768px) {
+  #comment textarea {
+    height: 100px;
+  }
+}
+.error {
+  border: 1px solid red;
+}

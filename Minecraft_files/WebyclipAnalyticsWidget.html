@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!-- saved from url=(0076)https://mohanpatt.github.io/mtpprp2/index_files/WebyclipAnalyticsWidget.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <title></title>
+        
+        <meta name="viewport" content="width=device-width">
+        <script type="text/javascript" src="./jquery_002(1).js"></script>
+        <script type="text/javascript" src="./jquery(1).js"></script>
+        <script type="text/javascript" src="./webyclip.js"></script>
+        <script type="text/javascript">
+            (function($) {
+                var AnalyticsWidget = function() {
+                    
+                    var _startDate = new Date().getTime();
+                    var _stopSent = false;
+                    var _forceStopped = false;
+                    var _stopParams = {};
+                    var _okToRun = true;
+                    var _referrer = document._referrer;
+
+                    var _userExperimentValues = {}
+                    
+                    var _messageListener = function(name, data) {
+                        switch (name) {
+                            case "SET_CONFIG":
+                                _configureObject(data);
+                                _trackEvents();
+                                postMessageToParent(":INTERACTIVE", {});
+                                break;
+                            case "START":
+                                _reportStart(data)
+                                break;
+                            case "SET_STOP_PARAMS":
+                                _setStopParams(data);
+                                break;
+                            case "EVENT":
+                                _handleEvent(data,data.async);
+                                break;
+                            default:
+                                console.log("messageListener - unreconized event \"" + name + "\"");
+                        }
+                    };
+                    
+                    var _configureObject = function(data) {
+                        _params = data.params;
+                        _asyncClose = data.asyncClose || true;
+                        _maxMinutes = data.maxMinutes || 60;
+
+                        _counters = _createCounters(data.counters.names);
+                        _countersLogic = data.counters.logic;
+
+                        _setUserExperiments(data.experiments || {})
+                    };
+                    
+                    var _createUserConfig = function() {
+                        // Set the internal config
+                        var visitorId = $.cookie('wc_vid');
+                        if (visitorId === null || typeof (visitorId) === "undefined") {
+                            // Generates new Visitor Id
+                            visitorId = uuid();
+                            $.cookie('wc_vid', visitorId, {expires: 365 * 10, path: '/'});
+                        }
+        
+                        var visitorIdFromCookie = $.cookie('wc_vid');
+                        var lastInteractionId = $.cookie('wc_last_iid');
+                        // Generates new interaction id
+                        var interactionId = uuid();
+                        $.cookie('wc_last_iid', interactionId, {expires: 365 * 10, path: '/'});
+                        
+                        if (visitorId !== visitorIdFromCookie || (lastInteractionId !== null && typeof (lastInteractionId) !== "undefined" && lastInteractionId === interactionId)) {
+                            _okToRun = false;
+                        }
+                                                
+                        return {
+                            visitorId : visitorId,
+                            interactionId : interactionId
+                        };
+                    };
+                    
+                    var _setUserExperiments = function(config) {
+
+                        // get values of persistent experiments
+                        var experimentCookie = $.cookie("wc_experiment");
+                        if (experimentCookie) {
+                            _userExperimentValues = $.parseJSON(experimentCookie);
+                        }
+
+                        // set values for experiments with no value
+                        for (var experiment in config) {
+                            if (!(experiment in _userExperimentValues)) {
+                                var expConfig = config[experiment];
+                                if (expConfig.options) {
+                                    var val = expConfig.options[Math.floor(Math.random() * expConfig.options.length)];
+                                    _userExperimentValues[experiment] = val;
+                                }
+                            }
+                        }
+
+                        // persist the values
+                        $.cookie('wc_experiment', JSON.stringify(_userExperimentValues), {expires: 365 * 10, path: '/'});
+
+                        postMessageToParent("experimentValues", [_userExperimentValues]);
+                    }
+
+                    var _createCounters = function(countersNames) {
+                        var result = {};
+                        $.each(countersNames, function(idx,val){
+                            result[val] = 0;
+                        });
+                        return result;
+                    };
+                    
+                    var _handleEvent = function(data,async) {
+                        _updateCounters(data.eventName);
+                        _reportEvent(data.eventName, data.eventData, async);
+                    };
+                    
+                    
+                    var _trackEvents = function() {
+
+                        pageUnloadPromise.then(function(){
+                            if (!_stopSent) {
+                                if (!_forceStopped) {
+                                    _reportEvent('stop', _stopParams, _asyncClose);
+                                    _stopSent = true;
+                                }
+                            }
+                        });
+                        setTimeout(function() {
+                            _forceStopped = true;
+                            if (!_stopSent) {
+                                _reportEvent('stop', _stopParams, _asyncClose);
+                                _stopSent = true;
+                            }
+                        }, _maxMinutes * 60 * 1000);
+                        
+                    };
+                    
+                    var _reportEvent = function(eventName, addtionalInfo, aSync) {
+
+                        var url = _getImageUrlForEvent(eventName, _startDate, _userConfig, _referrer, _params, _counters, addtionalInfo);
+                        
+                        //console.log("report event: " + eventName);
+                        _internalReportEvent(url, aSync, (eventName === 'start'));
+                    };
+
+                    var _getImageUrlForEvent = function(eventName, startDate, userConfig, referrer, params, counters, additionalInfo) {
+
+                        var args = {
+                            _en: eventName,
+                            _ts: ((new Date().getTime()) - startDate),
+                            _vid: userConfig.visitorId,
+                            _iid: userConfig.interactionId,
+                            _rnd: Math.floor((Math.random() * 10000) + 1),
+                            _referrer:referrer
+                        };
+                        $.extend(args,params);
+                        $.extend(args,counters);
+                        $.extend(args, additionalInfo);
+
+                        if (true) {
+                            args = _argumentsBackwardCompatibility(args);
+                        }
+
+                        var url = __urlBase + '/__wc.gif?' + Object.keys(args)
+                            .filter(function(key) { return typeof args[key] !== 'undefined' && args[key] !== null})
+                            .map(function(key) { return key + '=' + encodeURIComponent(args[key]).replace("'", "%27")})
+                            .join("&");
+
+                        return url;
+                    };
+
+                    var _argumentsBackwardCompatibility = function(args) {
+
+                        var backwardArgs = $.extend({}, args);
+
+                        _replaceArgValue(backwardArgs, "_en", "start", "START");
+                        _replaceArgValue(backwardArgs, "_en", "contextLoad", "ContextLoaded");
+                        _replaceArgValue(backwardArgs, "_en", "playStart", "LinkClicked");
+                        _replaceArgValue(backwardArgs, "_en", "playEnd", "playDuration");
+                        _replaceArgValue(backwardArgs, "_en", "relatedItemClick", "RelatedItemLinkClicked");
+                        _replaceArgValue(backwardArgs, "_en", "stop", "STOP");
+
+
+                        _replaceArgKey(backwardArgs, "siteId", "site_id");
+                        _replaceArgKey(backwardArgs, "contextType", "context_type");
+                        _replaceArgKey(backwardArgs, "contextId", "context_id");
+                        _replaceArgKey(backwardArgs, "contextInstanceId", "context_instance_id");
+
+                        return backwardArgs;
+
+                    };
+
+                    var _replaceArgKey = function(args, fromKey, toKey) {
+                        if (args[fromKey]) {
+                            args[toKey] = args[fromKey];
+                            delete args[fromKey];
+                        }
+                    }
+                    var _replaceArgValue = function(args, key, fromValue, toValue) {
+
+                        if (args[key] === fromValue) {
+                            args[key] = toValue;
+                        }
+                    }
+
+
+                    var _getPendingUrls = function() {
+                        var pendingUrlsArr = [];
+                        var pendingUrls = $.cookie('wc_anlytics_pending_arr');
+                        if (typeof(pendingUrls) !== 'undefined' && pendingUrls !== null) {
+                            pendingUrlsArr = $.parseJSON(pendingUrls);
+                        }
+                        return pendingUrlsArr;
+                    };
+                    
+                    var _setPendingUrls = function(pendingUrlsArr,newUrl) {
+                        if (newUrl !== null) {
+                            pendingUrlsArr.push(newUrl);
+                        }
+                        var pendingUrls = JSON.stringify(pendingUrlsArr);
+                        $.cookie('wc_anlytics_pending_arr', pendingUrls, {expires: 30, path: '/'});
+                    };
+                    
+                    
+                    var _internalReportEvent = function(url, aSync, check) {
+                        var pendingUrlsArr = _getPendingUrls();
+                        
+                        if (check) {
+                            $.each(pendingUrlsArr, function(idx, val) {
+                                _internalReportEvent(val, false, false);
+                            });
+                        }
+                        if (!aSync) {
+                            _setPendingUrls(pendingUrlsArr,url);
+                        }
+
+                        $.ajax({
+                            url: url,
+                            success: function() { /*console.log(url);*/_successCallback(url,aSync); },
+                            async: aSync
+                        });
+                        
+                    };
+                    
+                    var _successCallback = function(url,aSync) {
+                        if (!aSync) {
+                            var pendingUrlsArr = _getPendingUrls();                              
+                            // Get a new array without this url
+                            var updatedPendingUrlsArr = $.grep(pendingUrlsArr, function(item) {
+                                return item !== url;
+                            });
+            
+                            // Write the result to cookie
+                            _setPendingUrls(updatedPendingUrlsArr,null);
+                        }
+                    };
+                                   
+                    var _updateCounters = function(eventName) {
+                        if (_countersLogic[eventName]) {
+                            _counters[_countersLogic[eventName].counter] += _countersLogic[eventName].change;
+                        }
+                    };
+
+                    var _reportStart = function(params) {
+
+                        for (exp in _userExperimentValues) {
+                            params["exp_" + exp] = _userExperimentValues[exp];
+                        }
+                        _reportEvent('start', params, true);
+
+                    }
+
+                    var _setStopParams = function(params) {
+                        _stopParams = params;
+                    }
+                                                            
+                    var __protocol = 'http';
+                    if (location.protocol.toLowerCase() === 'https:') {
+                        __protocol = 'https';
+                    }
+                    var __urlBase = __protocol + '://' + ((__protocol === 'http') ? 'analytics.webyclip.com' : '0cade0655bc026201a9a-d95b928c91b5835e9ef14723f2350a83.ssl.cf2.rackcdn.com');
+                    var _userConfig = _createUserConfig();
+                    registerMessageListener(_messageListener);
+                    if (_okToRun) {
+                        postMessageToParent(":READY", {});
+                    }
+                };
+                
+                new AnalyticsWidget();
+                
+            })(jQuery);
+        </script>
+    </head>
+    <body>
+    
+</body></html>
